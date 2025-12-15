@@ -42,16 +42,13 @@ AB <- c(1, 2, 2, 5, 5, 5)
 combinations <- DoubleDigestProblem(Sequence_A,Sequence_B, AB)
 
 
-Remove <- function(deltaX, difference){
-  new_deltaX <- deltaX
-  for (i in length(deltaX)){
-    for (j in length(difference))
-      if (deltaX[i] == difference[j]){
-        new_deltaX <- remove(new_deltaX, difference[j])
-      }
+Remove <- function(x, y){
+  for (v in y) {
+    i <- match(v, x)
+    if (is.na(i)) return(NULL)
+    x <- x[-i]
   }
-  print(new_deltaX)
-  return(new_deltaX)
+  x
 }
 
 Place <- function(deltaX, X, width){
@@ -59,10 +56,40 @@ Place <- function(deltaX, X, width){
     return(X)
   }
   y <- max(deltaX)
-  difference <- c()
-  for (i in length(X)){
-    difference <- append(difference, (y-X[i]))
+  difference <- abs(y - X)
+  deltaX_new <- Remove(deltaX, difference)
+  
+  if (!is.null(deltaX_new)){
+    res <- Place(deltaX_new, c(X, y), width)
+    if (!is.null(res)) return(res)
   }
+  
+  ## 2. zkus width - y
+  y_new <- width - y
+  difference <- abs(y_new - X)
+  deltaX_new <- Remove(deltaX, difference)
+  
+  if (!is.null(deltaX_new)){
+    res <- Place(deltaX_new, c(X, y_new), width)
+    if (!is.null(res)) return(res)
+  }
+  
+  ## když nic nevyšlo
+  return(NULL)
+}
+
+PartialDigestProblem <- function(deltaX){
+  width <- max(deltaX)
+  X <- c(0, width)
+  deltaX <- deltaX[! deltaX%in% width]
+  print(X)
+  print(deltaX)
+  return(Place(deltaX, X, width))
 }
 
 Remove(c(4,4,5,2,3,5), c(8,6,8,9,6,3))
+deltaX <- c(2, 2, 3, 3, 4, 5, 6, 7, 8, 10)
+X <- PartialDigestProblem(deltaX)
+print(X)
+
+
